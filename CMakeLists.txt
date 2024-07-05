@@ -57,6 +57,11 @@ endif()
 
 set(DOXYGEN_USE_MATHJAX YES)
 set(DOXYGEN_USE_TEMPLATE_CSS YES)
+set(DOXYGEN_GENERATE_XML YES)
+set(DOXYGEN_PREDEFINED "PINOCCHIO_WITH_HPP_FCL")
+set(DOXYGEN_TAGFILES
+    "/home/jvaillan/dev/inria/hpp-fcl/hpp-fcl/build/doc/hpp-fcl.doxytag=/home/jvaillan/dev/inria/hpp-fcl/hpp-fcl/build/doc/doxygen-html"
+)
 
 include("${JRL_CMAKE_MODULES}/base.cmake")
 
