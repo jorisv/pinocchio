@@ -110,6 +110,7 @@ jobs:
           result-encoding: string
 
       - name: Build Pinocchio [MacOS/Linux/Windows]
+        shell: bash -el {0}
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 2
           PINOCCHIO_BUILD_TYPE: ${{ matrix.build_type }}
@@ -123,6 +124,7 @@ jobs:
           pixi run -e ${{ matrix.environment }} cmake --install build
 
       - name: Uninstall Pinocchio
+        shell: bash -el {0}
         run: |
           cmake --build build --target uninstall
 
