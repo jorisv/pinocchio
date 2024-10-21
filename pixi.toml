@@ -78,12 +78,10 @@ activation = { env = { PINOCCHIO_SDF_SUPPORT = "ON" } }
 dependencies = { casadi = ">=3.6.7" }
 activation = { env = { PINOCCHIO_CASADI_SUPPORT = "ON" } }
 
-# TODO find why it's not working
 [feature.autodiff]
 dependencies = { cppad = ">=20230000.0", pycppad = ">=1.2.4" }
 activation = { env = { PINOCCHIO_AUTODIFF_SUPPORT = "ON" } }
 
-# TODO find why it's not working
 # Not supported by Windows
 [feature.codegen]
 [feature.codegen.target.unix]
