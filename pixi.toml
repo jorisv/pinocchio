@@ -141,9 +141,9 @@ codegen = { features = ["codegen", "py312"], solve-group = "py312" }
 mpfr = { features = ["mpfr", "py312"], solve-group = "py312" }
 sdf = { features = ["sdf", "py312"], solve-group = "py312" }
 py39 = { features = ["py39"], solve-group = "py39" }
+# Accelerate will only work in Eigen next release
 all = { features = [
   "collision",
-  "accelerate",
   "casadi",
   "autodiff",
   "extra",
@@ -155,7 +155,6 @@ all = { features = [
 ], solve-group = "py312" }
 all-py39 = { features = [
   "collision",
-  "accelerate",
   "casadi",
   "autodiff",
   "extra",
@@ -167,7 +166,6 @@ all-py39 = { features = [
 ], solve-group = "py39" }
 all-clang-cl = { features = [
   "collision",
-  "accelerate",
   "casadi",
   "autodiff",
   "extra",
