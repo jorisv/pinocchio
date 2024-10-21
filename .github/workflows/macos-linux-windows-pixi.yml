@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   pinocchio-pixi:
-    name: ${{ matrix.os }} - Env ${{ matrix.environment }} ${{ matrix.build_type }} ${{ matrix.compiler }}
+    name: ${{ matrix.os }} - Env ${{ matrix.environment }} ${{ matrix.build_type }} ${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
     env:
       CCACHE_BASEDIR: ${GITHUB_WORKSPACE}
@@ -66,6 +66,7 @@ jobs:
     steps:
       # extract branch name or checkout devel branch for scheduled events
       - name: Get branch name or checkout devel
+        shell: bash -el {0}
         run: |
           if [ "${{ github.event_name }}" == "schedule" ]; then
             echo "BRANCH_NAME=devel" >> $GITHUB_ENV
