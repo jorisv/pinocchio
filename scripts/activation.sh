@@ -1,3 +1,6 @@
+#! /bin/bash
+# Activation script
+
 # Remove flags setup from cxx-compiler
 unset CFLAGS
 unset CPPFLAGS
