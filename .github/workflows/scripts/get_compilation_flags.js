@@ -62,13 +62,21 @@ function makeLabelToOptions() {
   }
 }
 
+function getPullRequestNumber(ref) {
+  // This assumes that the ref is in the form of `refs/pull/:prNumber/merge`
+  const prNumber = ref.replace(/refs\/pull\/(\d+)\/merge/, '$1');
+  return parseInt(prNumber, 10);
+}
+
 // Get activated labels
-function getLabelNames(prNumber) {
+async function getLabelNames(github, context) {
   const {LABELS} = process.env;
 
   if(LABELS) {
     return [LABELS];
   } else {
+    const prNumber = context.issue.number || getPullRequestNumber(context.ref);
+
     if(isNaN(prNumber)) {
       return [];
     }
@@ -84,17 +92,8 @@ function getLabelNames(prNumber) {
 
 // Inspired by https://github.com/emmenko/action-verify-pr-labels/tree/master
 module.exports = async ({github, context, core}) => {
-  const getPullRequestNumber = (ref) => {
-      core.debug(`Parsing ref: ${ref}`);
-      // This assumes that the ref is in the form of `refs/pull/:prNumber/merge`
-      const prNumber = ref.replace(/refs\/pull\/(\d+)\/merge/, '$1');
-      return parseInt(prNumber, 10);
-  };
-
-  const prNumber = context.issue.number || getPullRequestNumber(context.ref);
-
   const labelToOptions = makeLabelToOptions();
-  const labelNames = getLabelNames(prNumber);
+  const labelNames = await getLabelNames(github, context);
   let options = new CMakeOptions();
 
   // Turn CMake options ON
