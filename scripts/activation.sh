@@ -1,15 +1,6 @@
 #! /bin/bash
 # Activation script
 
-# Remove flags setup from cxx-compiler
-unset CFLAGS
-unset CPPFLAGS
-unset CXXFLAGS
-unset DEBUG_CFLAGS
-unset DEBUG_CPPFLAGS
-unset DEBUG_CXXFLAGS
-unset LDFLAGS
-
 # Setup ccache
 export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 
