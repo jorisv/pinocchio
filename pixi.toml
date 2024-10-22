@@ -35,6 +35,7 @@ scripts = ["scripts/activation.bat"]
 # We must avoid to set CMAKE_CXX_FLAGS because of WIN32
 # https://discourse.cmake.org/t/strictly-appending-to-cmake-lang-flags/6478
 configure = { cmd = [
+  "CXXFLAGS=$PINOCCHIO_CXX_FLAGS",
   "cmake",
   "-G",
   "Ninja",
