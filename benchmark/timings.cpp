@@ -168,7 +168,7 @@ int main(int argc, const char ** argv)
 
   PinocchioTicToc timer(PinocchioTicToc::US);
 #ifdef NDEBUG
-  const int NBT = 1000 * 100;
+  const int NBT = 1000 * 1000;
 #else
   const int NBT = 1;
   std::cout << "(the time score in debug mode is not relevant) " << std::endl;
@@ -213,6 +213,10 @@ int main(int argc, const char ** argv)
     taus[i] = Eigen::VectorXd::Random(model.nv);
   }
 
+  SMOOTH(NBT / 10)
+  {
+    rnea(model, data, qs[_smooth], qdots[_smooth], qddots[_smooth]);
+  }
   timer.tic();
   SMOOTH(NBT)
   {
@@ -221,6 +225,10 @@ int main(int argc, const char ** argv)
   std::cout << "RNEA = \t\t\t\t";
   timer.toc(std::cout, NBT);
 
+  SMOOTH(NBT / 10)
+  {
+    nonLinearEffects(model, data, qs[_smooth], qdots[_smooth]);
+  }
   timer.tic();
   SMOOTH(NBT)
   {
@@ -229,14 +237,18 @@ int main(int argc, const char ** argv)
   std::cout << "NLE = \t\t\t\t";
   timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    rnea(model, data, qs[_smooth], qdots[_smooth], Eigen::VectorXd::Zero(model.nv));
-  }
-  std::cout << "NLE via RNEA = \t\t\t";
-  timer.toc(std::cout, NBT);
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   rnea(model, data, qs[_smooth], qdots[_smooth], Eigen::VectorXd::Zero(model.nv));
+  // }
+  // std::cout << "NLE via RNEA = \t\t\t";
+  // timer.toc(std::cout, NBT);
 
+  SMOOTH(NBT / 10)
+  {
+    crba(model, data, qs[_smooth], Convention::LOCAL);
+  }
   timer.tic();
   SMOOTH(NBT)
   {
@@ -245,6 +257,10 @@ int main(int argc, const char ** argv)
   std::cout << "CRBA (original) = \t\t";
   timer.toc(std::cout, NBT);
 
+  SMOOTH(NBT / 10)
+  {
+    crba(model, data, qs[_smooth], Convention::WORLD);
+  }
   timer.tic();
   SMOOTH(NBT)
   {
@@ -253,55 +269,60 @@ int main(int argc, const char ** argv)
   std::cout << "CRBA = \t\t";
   timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeAllTerms(model, data, qs[_smooth], qdots[_smooth]);
-  }
-  std::cout << "computeAllTerms = \t\t";
-  timer.toc(std::cout, NBT);
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeAllTerms(model, data, qs[_smooth], qdots[_smooth]);
+  // }
+  // std::cout << "computeAllTerms = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // double total = 0;
+  // SMOOTH(NBT)
+  // {
+  //   crba(model, data, qs[_smooth], Convention::WORLD);
+  //   timer.tic();
+  //   cholesky::decompose(model, data);
+  //   total += timer.toc(timer.DEFAULT_UNIT);
+  // }
+  // std::cout << "Sparse Cholesky = \t\t" << (total / NBT) << " "
+  //           << timer.unitName(timer.DEFAULT_UNIT) << std::endl;
+  //
+  // total = 0;
+  // Eigen::LDLT<Eigen::MatrixXd> Mldlt(data.M);
+  // SMOOTH(NBT)
+  // {
+  //   crba(model, data, qs[_smooth], Convention::WORLD);
+  //   data.M.triangularView<Eigen::StrictlyLower>() =
+  //     data.M.transpose().triangularView<Eigen::StrictlyLower>();
+  //   timer.tic();
+  //   Mldlt.compute(data.M);
+  //   total += timer.toc(timer.DEFAULT_UNIT);
+  // }
+  // std::cout << "Dense Cholesky = \t\t" << (total / NBT) << " " <<
+  // timer.unitName(timer.DEFAULT_UNIT)
+  //           << std::endl;
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeJointJacobians(model, data, qs[_smooth]);
+  // }
+  // std::cout << "Jacobian = \t\t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeJointJacobiansTimeVariation(model, data, qs[_smooth], qdots[_smooth]);
+  // }
+  // std::cout << "Jacobian Derivative = \t\t";
+  // timer.toc(std::cout, NBT);
 
-  double total = 0;
-  SMOOTH(NBT)
+  SMOOTH(NBT / 10)
   {
-    crba(model, data, qs[_smooth], Convention::WORLD);
-    timer.tic();
-    cholesky::decompose(model, data);
-    total += timer.toc(timer.DEFAULT_UNIT);
+    jacobianCenterOfMass(model, data, qs[_smooth], true);
   }
-  std::cout << "Sparse Cholesky = \t\t" << (total / NBT) << " "
-            << timer.unitName(timer.DEFAULT_UNIT) << std::endl;
-
-  total = 0;
-  Eigen::LDLT<Eigen::MatrixXd> Mldlt(data.M);
-  SMOOTH(NBT)
-  {
-    crba(model, data, qs[_smooth], Convention::WORLD);
-    data.M.triangularView<Eigen::StrictlyLower>() =
-      data.M.transpose().triangularView<Eigen::StrictlyLower>();
-    timer.tic();
-    Mldlt.compute(data.M);
-    total += timer.toc(timer.DEFAULT_UNIT);
-  }
-  std::cout << "Dense Cholesky = \t\t" << (total / NBT) << " " << timer.unitName(timer.DEFAULT_UNIT)
-            << std::endl;
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeJointJacobians(model, data, qs[_smooth]);
-  }
-  std::cout << "Jacobian = \t\t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeJointJacobiansTimeVariation(model, data, qs[_smooth], qdots[_smooth]);
-  }
-  std::cout << "Jacobian Derivative = \t\t";
-  timer.toc(std::cout, NBT);
-
   timer.tic();
   SMOOTH(NBT)
   {
@@ -310,57 +331,61 @@ int main(int argc, const char ** argv)
   std::cout << "COM+Jcom = \t\t\t";
   timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   centerOfMass(model, data, qs[_smooth], qdots[_smooth], qddots[_smooth], true);
+  // }
+  // std::cout << "COM+vCOM+aCOM = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   forwardKinematics(model, data, qs[_smooth]);
+  // }
+  // std::cout << "Forward Kinematics(q) = \t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   forwardKinematics(model, data, qs[_smooth], qdots[_smooth]);
+  // }
+  // std::cout << "Forward Kinematics(q,v) = \t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   forwardKinematics(model, data, qs[_smooth], qdots[_smooth], qddots[_smooth]);
+  // }
+  // std::cout << "Forward Kinematics(q,v,a) = \t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   framesForwardKinematics(model, data, qs[_smooth]);
+  // }
+  // std::cout << "Frame Placement(q) = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // total = 0.;
+  // SMOOTH(NBT)
+  // {
+  //   forwardKinematics(model, data, qs[_smooth]);
+  //   timer.tic();
+  //   updateFramePlacements(model, data);
+  //   total += timer.toc(timer.DEFAULT_UNIT);
+  // }
+  // std::cout << "Update Frame Placement = \t" << (total / NBT) << " "
+  //           << timer.unitName(timer.DEFAULT_UNIT) << std::endl;
+  //
+  SMOOTH(NBT / 10)
   {
-    centerOfMass(model, data, qs[_smooth], qdots[_smooth], qddots[_smooth], true);
+    ccrba(model, data, qs[_smooth], qdots[_smooth]);
   }
-  std::cout << "COM+vCOM+aCOM = \t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    forwardKinematics(model, data, qs[_smooth]);
-  }
-  std::cout << "Forward Kinematics(q) = \t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    forwardKinematics(model, data, qs[_smooth], qdots[_smooth]);
-  }
-  std::cout << "Forward Kinematics(q,v) = \t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    forwardKinematics(model, data, qs[_smooth], qdots[_smooth], qddots[_smooth]);
-  }
-  std::cout << "Forward Kinematics(q,v,a) = \t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    framesForwardKinematics(model, data, qs[_smooth]);
-  }
-  std::cout << "Frame Placement(q) = \t\t";
-  timer.toc(std::cout, NBT);
-
-  total = 0.;
-  SMOOTH(NBT)
-  {
-    forwardKinematics(model, data, qs[_smooth]);
-    timer.tic();
-    updateFramePlacements(model, data);
-    total += timer.toc(timer.DEFAULT_UNIT);
-  }
-  std::cout << "Update Frame Placement = \t" << (total / NBT) << " "
-            << timer.unitName(timer.DEFAULT_UNIT) << std::endl;
-
   timer.tic();
   SMOOTH(NBT)
   {
@@ -369,81 +394,81 @@ int main(int argc, const char ** argv)
   std::cout << "CCRBA = \t\t\t";
   timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::LOCAL);
-  }
-  std::cout << "ABA (minimal) = \t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
-  }
-  std::cout << "ABA = \t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeCoriolisMatrix(model, data, qs[_smooth], qdots[_smooth]);
-  }
-  std::cout << "Coriolis Matrix = \t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeMinverse(model, data, qs[_smooth]);
-  }
-  std::cout << "Minv(q) = \t\t\t";
-  timer.toc(std::cout, NBT);
-
-  total = 0;
-  SMOOTH(NBT)
-  {
-    aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
-    timer.tic();
-    computeMinverse(model, data);
-    total += timer.toc(timer.DEFAULT_UNIT);
-  }
-  std::cout << "Minv() = \t\t\t" << (total / NBT) << " " << timer.unitName(timer.DEFAULT_UNIT)
-            << std::endl;
-  std::cout << "--" << std::endl;
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    emptyForwardPassUnaryVisit(model, data);
-  }
-  std::cout << "Forward Pass(jmodel,jdata) = \t\t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    emptyForwardPassUnaryVisitNoData(model, data);
-  }
-  std::cout << "Forward Pass(jmodel) = \t\t\t\t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    emptyForwardPassBinaryVisit(model, data);
-  }
-  std::cout << "Forward Pass(jmodel1,jmodel2,jdata1,jdata2) = \t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    emptyForwardPassBinaryVisitNoData(model, data);
-  }
-  std::cout << "Forward Pass(jmodel1,jmodel2) = \t\t";
-  timer.toc(std::cout, NBT);
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::LOCAL);
+  // }
+  // std::cout << "ABA (minimal) = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
+  // }
+  // std::cout << "ABA = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeCoriolisMatrix(model, data, qs[_smooth], qdots[_smooth]);
+  // }
+  // std::cout << "Coriolis Matrix = \t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeMinverse(model, data, qs[_smooth]);
+  // }
+  // std::cout << "Minv(q) = \t\t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // total = 0;
+  // SMOOTH(NBT)
+  // {
+  //   aba(model, data, qs[_smooth], qdots[_smooth], taus[_smooth], Convention::WORLD);
+  //   timer.tic();
+  //   computeMinverse(model, data);
+  //   total += timer.toc(timer.DEFAULT_UNIT);
+  // }
+  // std::cout << "Minv() = \t\t\t" << (total / NBT) << " " << timer.unitName(timer.DEFAULT_UNIT)
+  //           << std::endl;
+  // std::cout << "--" << std::endl;
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   emptyForwardPassUnaryVisit(model, data);
+  // }
+  // std::cout << "Forward Pass(jmodel,jdata) = \t\t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   emptyForwardPassUnaryVisitNoData(model, data);
+  // }
+  // std::cout << "Forward Pass(jmodel) = \t\t\t\t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   emptyForwardPassBinaryVisit(model, data);
+  // }
+  // std::cout << "Forward Pass(jmodel1,jmodel2,jdata1,jdata2) = \t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   emptyForwardPassBinaryVisitNoData(model, data);
+  // }
+  // std::cout << "Forward Pass(jmodel1,jmodel2) = \t\t";
+  // timer.toc(std::cout, NBT);
 
   std::cout << "--" << std::endl;
   return 0;

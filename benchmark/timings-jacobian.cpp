@@ -2,6 +2,7 @@
 // Copyright (c) 2015-2018 CNRS
 //
 
+#include "pinocchio/algorithm/frames.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
@@ -21,7 +22,7 @@ int main(int argc, const char ** argv)
 
   PinocchioTicToc timer(PinocchioTicToc::US);
 #ifdef NDEBUG
-  const int NBT = 1000 * 100;
+  const int NBT = 1000 * 2000;
 #else
   const int NBT = 1;
   std::cout << "(the time score in debug mode is not relevant) " << std::endl;
@@ -49,51 +50,61 @@ int main(int argc, const char ** argv)
     pinocchio::urdf::buildModel(filename, model);
   std::cout << "nq = " << model.nq << std::endl;
 
-  pinocchio::Data data(model);
-  VectorXd qmax = Eigen::VectorXd::Ones(model.nq);
+  pinocchio::Model::JointIndex JOINT_ID = (Model::JointIndex)(model.njoints - 1);
+  const SE3 & framePlacement = SE3::Random();
+  auto FRAME_ID = model.addFrame(Frame("test_frame", JOINT_ID, 0, framePlacement, OP_FRAME));
 
+  pinocchio::Data data(model);
   pinocchio::Data::Matrix6x J(6, model.nv);
   J.setZero();
-  pinocchio::Model::JointIndex JOINT_ID = (Model::JointIndex)(model.njoints - 1);
 
-  PINOCCHIO_ALIGNED_STD_VECTOR(VectorXd) qs(NBT);
-  for (size_t i = 0; i < NBT; ++i)
+  VectorXd q;
+  VectorXd qmax = Eigen::VectorXd::Ones(model.nq);
+  q = randomConfiguration(model, -qmax, qmax);
+  forwardKinematics(model, data, q);
+  computeJointJacobians(model, data, q);
+  updateFramePlacements(model, data);
+
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   forwardKinematics(model, data, qs[_smooth]);
+  // }
+  // std::cout << "Zero Order Kinematics = \t";
+  // timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
   {
-    qs[i] = randomConfiguration(model, -qmax, qmax);
+    computeJointJacobian(model, data, q, JOINT_ID, J);
   }
-
   timer.tic();
   SMOOTH(NBT)
   {
-    forwardKinematics(model, data, qs[_smooth]);
-  }
-  std::cout << "Zero Order Kinematics = \t";
-  timer.toc(std::cout, NBT);
-
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeJointJacobian(model, data, qs[_smooth], JOINT_ID, J);
+    computeJointJacobian(model, data, q, JOINT_ID, J);
   }
   std::cout << "computeJointJacobian = \t\t";
   timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
-  {
-    computeJointJacobians(model, data, qs[_smooth]);
-  }
-  std::cout << "computeJointJacobians(q) = \t";
-  timer.toc(std::cout, NBT);
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeJointJacobians(model, data, qs[_smooth]);
+  // }
+  // std::cout << "computeJointJacobians(q) = \t";
+  // timer.toc(std::cout, NBT);
+  //
+  // timer.tic();
+  // SMOOTH(NBT)
+  // {
+  //   computeJointJacobians(model, data);
+  // }
+  // std::cout << "computeJointJacobians() = \t";
+  // timer.toc(std::cout, NBT);
 
-  timer.tic();
-  SMOOTH(NBT)
+  SMOOTH(NBT / 100)
   {
-    computeJointJacobians(model, data);
+    getJointJacobian(model, data, JOINT_ID, LOCAL, J);
   }
-  std::cout << "computeJointJacobians() = \t";
-  timer.toc(std::cout, NBT);
-
   timer.tic();
   SMOOTH(NBT)
   {
@@ -102,12 +113,100 @@ int main(int argc, const char ** argv)
   std::cout << "getJointJacobian(LOCAL) = \t";
   timer.toc(std::cout, NBT);
 
+  SMOOTH(NBT / 100)
+  {
+    getJointJacobian(model, data, JOINT_ID, WORLD, J);
+  }
   timer.tic();
   SMOOTH(NBT)
   {
     getJointJacobian(model, data, JOINT_ID, WORLD, J);
   }
   std::cout << "getJointJacobian(WORLD) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    getJointJacobian(model, data, JOINT_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    getJointJacobian(model, data, JOINT_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  std::cout << "getJointJacobian(LOCAL_WORLD_ALIGNED) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    getFrameJacobian(model, data, FRAME_ID, LOCAL, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    getFrameJacobian(model, data, FRAME_ID, LOCAL, J);
+  }
+  std::cout << "getFrameJacobian(LOCAL) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    getFrameJacobian(model, data, FRAME_ID, WORLD, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    getFrameJacobian(model, data, FRAME_ID, WORLD, J);
+  }
+  std::cout << "getFrameJacobian(WORLD) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    getFrameJacobian(model, data, FRAME_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    getFrameJacobian(model, data, FRAME_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  std::cout << "getFrameJacobian(LOCAL_WORLD_ALIGNED) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, LOCAL, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, LOCAL, J);
+  }
+  std::cout << "computeFrameJacobian(LOCAL) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, WORLD, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, WORLD, J);
+  }
+  std::cout << "computeFrameJacobian(WORLD) = \t";
+  timer.toc(std::cout, NBT);
+
+  SMOOTH(NBT / 100)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  timer.tic();
+  SMOOTH(NBT)
+  {
+    computeFrameJacobian(model, data, q, FRAME_ID, LOCAL_WORLD_ALIGNED, J);
+  }
+  std::cout << "computeFrameJacobian(LOCAL_WORLD_ALIGNED) = \t";
   timer.toc(std::cout, NBT);
 
   std::cout << "--" << std::endl;
