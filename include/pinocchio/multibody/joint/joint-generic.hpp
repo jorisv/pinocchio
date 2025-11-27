@@ -6,8 +6,6 @@
 #define __pinocchio_multibody_joint_generic_hpp__
 
 #include "pinocchio/multibody/joint/joint-collection.hpp"
-#include "pinocchio/multibody/joint/joint-composite.hpp"
-#include "pinocchio/multibody/joint/joint-basic-visitors.hxx"
 #include "pinocchio/container/aligned-vector.hpp"
 
 #include <boost/mpl/contains.hpp>
@@ -115,48 +113,48 @@ namespace pinocchio
       return *static_cast<const JointDataVariant *>(this);
     }
 
-    ConfigVector_t joint_q() const
-    {
-      return pinocchio::joint_q(*this);
-    }
-    TangentVector_t joint_v() const
-    {
-      return pinocchio::joint_v(*this);
-    }
-    Constraint_t S() const
-    {
-      return joint_motin_subspace_xd(*this);
-    }
-    Transformation_t M() const
-    {
-      return joint_transform(*this);
-    }
-    Motion_t v() const
-    {
-      return motion(*this);
-    }
-    Bias_t c() const
-    {
-      return bias(*this);
-    }
+    // ConfigVector_t joint_q() const
+    // {
+    //   return pinocchio::joint_q(*this);
+    // }
+    // TangentVector_t joint_v() const
+    // {
+    //   return pinocchio::joint_v(*this);
+    // }
+    // Constraint_t S() const
+    // {
+    //   return joint_motin_subspace_xd(*this);
+    // }
+    // Transformation_t M() const
+    // {
+    //   return joint_transform(*this);
+    // }
+    // Motion_t v() const
+    // {
+    //   return motion(*this);
+    // }
+    // Bias_t c() const
+    // {
+    //   return bias(*this);
+    // }
 
-    // [ABA CCRBA]
-    U_t U() const
-    {
-      return u_inertia(*this);
-    }
-    D_t Dinv() const
-    {
-      return dinv_inertia(*this);
-    }
-    UD_t UDinv() const
-    {
-      return udinv_inertia(*this);
-    }
-    D_t StU() const
-    {
-      return stu_inertia(*this);
-    }
+    // // [ABA CCRBA]
+    // U_t U() const
+    // {
+    //   return u_inertia(*this);
+    // }
+    // D_t Dinv() const
+    // {
+    //   return dinv_inertia(*this);
+    // }
+    // UD_t UDinv() const
+    // {
+    //   return udinv_inertia(*this);
+    // }
+    // D_t StU() const
+    // {
+    //   return stu_inertia(*this);
+    // }
 
     JointDataTpl()
     : JointDataVariant()
@@ -176,61 +174,61 @@ namespace pinocchio
     }
 
     // Define all the standard accessors
-    ConfigVector_t joint_q_accessor() const
-    {
-      return joint_q();
-    }
-    TangentVector_t joint_v_accessor() const
-    {
-      return joint_v();
-    }
-    Constraint_t S_accessor() const
-    {
-      return S();
-    }
-    Transformation_t M_accessor() const
-    {
-      return M();
-    }
-    Motion_t v_accessor() const
-    {
-      return v();
-    }
-    Bias_t c_accessor() const
-    {
-      return c();
-    }
-    U_t U_accessor() const
-    {
-      return U();
-    }
-    D_t Dinv_accessor() const
-    {
-      return Dinv();
-    }
-    UD_t UDinv_accessor() const
-    {
-      return UDinv();
-    }
-    D_t StU_accessor() const
-    {
-      return StU();
-    }
+    // ConfigVector_t joint_q_accessor() const
+    // {
+    //   return joint_q();
+    // }
+    // TangentVector_t joint_v_accessor() const
+    // {
+    //   return joint_v();
+    // }
+    // Constraint_t S_accessor() const
+    // {
+    //   return S();
+    // }
+    // Transformation_t M_accessor() const
+    // {
+    //   return M();
+    // }
+    // Motion_t v_accessor() const
+    // {
+    //   return v();
+    // }
+    // Bias_t c_accessor() const
+    // {
+    //   return c();
+    // }
+    // U_t U_accessor() const
+    // {
+    //   return U();
+    // }
+    // D_t Dinv_accessor() const
+    // {
+    //   return Dinv();
+    // }
+    // UD_t UDinv_accessor() const
+    // {
+    //   return UDinv();
+    // }
+    // D_t StU_accessor() const
+    // {
+    //   return StU();
+    // }
 
     static std::string classname()
     {
       return "JointData";
     }
-    std::string shortname() const
-    {
-      return ::pinocchio::shortname(*this);
-    }
+    // std::string shortname() const
+    // {
+    //   return ::pinocchio::shortname(*this);
+    // }
 
-    template<typename JointDataDerived>
-    bool isEqual(const JointDataBase<JointDataDerived> & other) const
-    {
-      return ::pinocchio::isEqual(*this, other.derived());
-    }
+    // template<typename JointDataDerived>
+    // bool isEqual(const JointDataBase<JointDataDerived> & other) const
+    // {
+    //   return ::pinocchio::isEqual(*this, other.derived());
+    // }
 
     bool isEqual(const JointDataTpl & other) const
     {
@@ -289,15 +287,15 @@ namespace pinocchio
     {
     }
 
-    const std::vector<bool> hasConfigurationLimit() const
-    {
-      return ::pinocchio::hasConfigurationLimit(*this);
-    }
+    // const std::vector<bool> hasConfigurationLimit() const
+    // {
+    //   return ::pinocchio::hasConfigurationLimit(*this);
+    // }
 
-    const std::vector<bool> hasConfigurationLimitInTangent() const
-    {
-      return ::pinocchio::hasConfigurationLimitInTangent(*this);
-    }
+    // const std::vector<bool> hasConfigurationLimitInTangent() const
+    // {
+    //   return ::pinocchio::hasConfigurationLimitInTangent(*this);
+    // }
 
     template<typename JointModelDerived>
     JointModelTpl(const JointModelBase<JointModelDerived> & jmodel)
@@ -317,22 +315,22 @@ namespace pinocchio
       return *static_cast<const JointModelVariant *>(this);
     }
 
-    JointDataDerived createData() const
-    {
-      return ::pinocchio::createData<Scalar, Options, JointCollectionTpl>(*this);
-    }
+    // JointDataDerived createData() const
+    // {
+    //   return ::pinocchio::createData<Scalar, Options, JointCollectionTpl>(*this);
+    // }
 
-    template<typename JointModelDerived>
-    bool isEqual(const JointModelBase<JointModelDerived> & other) const
-    {
-      return ::pinocchio::isEqual(*this, other.derived());
-    }
+    // template<typename JointModelDerived>
+    // bool isEqual(const JointModelBase<JointModelDerived> & other) const
+    // {
+    //   return ::pinocchio::isEqual(*this, other.derived());
+    // }
 
-    template<typename JointModelDerived>
-    bool hasSameIndexes(const JointModelBase<JointModelDerived> & other) const
-    {
-      return ::pinocchio::hasSameIndexes(*this, other.derived());
-    }
+    // template<typename JointModelDerived>
+    // bool hasSameIndexes(const JointModelBase<JointModelDerived> & other) const
+    // {
+    //   return ::pinocchio::hasSameIndexes(*this, other.derived());
+    // }
 
     bool isEqual(const JointModelTpl & other) const
     {
@@ -371,98 +369,98 @@ namespace pinocchio
       calc_first_order(*this, data, q.derived(), v.derived());
     }
 
-    template<typename VectorLike, typename Matrix6Like>
-    void calc_aba(
-      JointDataDerived & data,
-      const Eigen::MatrixBase<VectorLike> & armature,
-      const Eigen::MatrixBase<Matrix6Like> & I,
-      const bool update_I) const
-    {
-      ::pinocchio::calc_aba(
-        *this, data, armature.derived(), PINOCCHIO_EIGEN_CONST_CAST(Matrix6Like, I), update_I);
-    }
+    // template<typename VectorLike, typename Matrix6Like>
+    // void calc_aba(
+    //   JointDataDerived & data,
+    //   const Eigen::MatrixBase<VectorLike> & armature,
+    //   const Eigen::MatrixBase<Matrix6Like> & I,
+    //   const bool update_I) const
+    // {
+    //   ::pinocchio::calc_aba(
+    //     *this, data, armature.derived(), PINOCCHIO_EIGEN_CONST_CAST(Matrix6Like, I), update_I);
+    // }
 
-    /* Acces to dedicated segment in robot config space.  */
-    // Const access
-    template<typename D>
-    typename SizeDepType<NV>::template SegmentReturn<D>::ConstType
-    JointMappedConfigSelector_impl(const Eigen::MatrixBase<D> & a) const
-    {
-      typedef const Eigen::MatrixBase<D> & InputType;
-      typedef typename SizeDepType<NV>::template SegmentReturn<D>::ConstType ReturnType;
-      typedef JointMappedConfigSelectorVisitor<InputType, ReturnType> Visitor;
-      typename Visitor::ArgsType arg(a);
-      return Visitor::run(*this, arg);
-    }
+    // /* Acces to dedicated segment in robot config space.  */
+    // // Const access
+    // template<typename D>
+    // typename SizeDepType<NV>::template SegmentReturn<D>::ConstType
+    // JointMappedConfigSelector_impl(const Eigen::MatrixBase<D> & a) const
+    // {
+    //   typedef const Eigen::MatrixBase<D> & InputType;
+    //   typedef typename SizeDepType<NV>::template SegmentReturn<D>::ConstType ReturnType;
+    //   typedef JointMappedConfigSelectorVisitor<InputType, ReturnType> Visitor;
+    //   typename Visitor::ArgsType arg(a);
+    //   return Visitor::run(*this, arg);
+    // }
 
-    // Non-const access
-    template<typename D>
-    typename SizeDepType<NV>::template SegmentReturn<D>::Type
-    JointMappedConfigSelector_impl(Eigen::MatrixBase<D> & a) const
-    {
-      typedef Eigen::MatrixBase<D> & InputType;
-      typedef typename SizeDepType<NV>::template SegmentReturn<D>::Type ReturnType;
-      typedef JointMappedConfigSelectorVisitor<InputType, ReturnType> Visitor;
-      typename Visitor::ArgsType arg(a);
-      return Visitor::run(*this, arg);
-    }
+    // // Non-const access
+    // template<typename D>
+    // typename SizeDepType<NV>::template SegmentReturn<D>::Type
+    // JointMappedConfigSelector_impl(Eigen::MatrixBase<D> & a) const
+    // {
+    //   typedef Eigen::MatrixBase<D> & InputType;
+    //   typedef typename SizeDepType<NV>::template SegmentReturn<D>::Type ReturnType;
+    //   typedef JointMappedConfigSelectorVisitor<InputType, ReturnType> Visitor;
+    //   typename Visitor::ArgsType arg(a);
+    //   return Visitor::run(*this, arg);
+    // }
 
-    std::string shortname() const
-    {
-      return ::pinocchio::shortname(*this);
-    }
+    // std::string shortname() const
+    // {
+    //   return ::pinocchio::shortname(*this);
+    // }
     static std::string classname()
     {
       return "JointModel";
     }
 
-    int nq_impl() const
-    {
-      return ::pinocchio::nq(*this);
-    }
-    int nv_impl() const
-    {
-      return ::pinocchio::nv(*this);
-    }
-    int nvExtended_impl() const
-    {
-      return ::pinocchio::nvExtended(*this);
-    }
+    // int nq_impl() const
+    // {
+    //   return ::pinocchio::nq(*this);
+    // }
+    // int nv_impl() const
+    // {
+    //   return ::pinocchio::nv(*this);
+    // }
+    // int nvExtended_impl() const
+    // {
+    //   return ::pinocchio::nvExtended(*this);
+    // }
 
-    int idx_q_impl() const
-    {
-      return ::pinocchio::idx_q(*this);
-    }
-    int idx_v_impl() const
-    {
-      return ::pinocchio::idx_v(*this);
-    }
-    int idx_vExtended_impl() const
-    {
-      return ::pinocchio::idx_vExtended(*this);
-    }
+    // int idx_q_impl() const
+    // {
+    //   return ::pinocchio::idx_q(*this);
+    // }
+    // int idx_v_impl() const
+    // {
+    //   return ::pinocchio::idx_v(*this);
+    // }
+    // int idx_vExtended_impl() const
+    // {
+    //   return ::pinocchio::idx_vExtended(*this);
+    // }
 
-    JointIndex id_impl() const
-    {
-      return ::pinocchio::id(*this);
-    }
+    // JointIndex id_impl() const
+    // {
+    //   return ::pinocchio::id(*this);
+    // }
 
-    void setIndexes(JointIndex id, int nq, int nv)
-    {
-      ::pinocchio::setIndexes(*this, id, nq, nv, nv);
-    }
+    // void setIndexes(JointIndex id, int nq, int nv)
+    // {
+    //   ::pinocchio::setIndexes(*this, id, nq, nv, nv);
+    // }
 
-    void setIndexes(JointIndex id, int nq, int nv, int nvExtended)
-    {
-      ::pinocchio::setIndexes(*this, id, nq, nv, nvExtended);
-    }
+    // void setIndexes(JointIndex id, int nq, int nv, int nvExtended)
+    // {
+    //   ::pinocchio::setIndexes(*this, id, nq, nv, nvExtended);
+    // }
 
     /// \returns An expression of *this with the Scalar type casted to NewScalar.
-    template<typename NewScalar>
-    JointModelTpl<NewScalar, Options, JointCollectionTpl> cast() const
-    {
-      return cast_joint<NewScalar, Scalar, Options, JointCollectionTpl>(*this);
-    }
+    // template<typename NewScalar>
+    // JointModelTpl<NewScalar, Options, JointCollectionTpl> cast() const
+    // {
+    //   return cast_joint<NewScalar, Scalar, Options, JointCollectionTpl>(*this);
+    // }
   };
 
   typedef PINOCCHIO_ALIGNED_STD_VECTOR(JointData) JointDataVector;

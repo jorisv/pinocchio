@@ -11,4 +11,6 @@
 #include "pinocchio/multibody/joint/joint-model-base.hpp"
 #include "pinocchio/multibody/joint/joint-data-base.hpp"
 
+#include <boost/mpl/bool_fwd.hpp>
+
 #endif // ifndef __pinocchio_multibody_joint_base_hpp__

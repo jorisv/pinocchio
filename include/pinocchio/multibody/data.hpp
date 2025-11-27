@@ -16,13 +16,13 @@
 #include "pinocchio/multibody/fwd.hpp"
 #include "pinocchio/multibody/joint/joint-generic.hpp"
 #include "pinocchio/container/aligned-vector.hpp"
-#include "pinocchio/algorithm/contact-cholesky.hpp"
+// #include "pinocchio/algorithm/contact-cholesky.hpp"
 
 #include "pinocchio/serialization/serializable.hpp"
 
-#include <Eigen/Cholesky>
-#include <Eigen/StdVector>
-#include <Eigen/src/Core/util/Constants.h>
+// #include <Eigen/Cholesky>
+// #include <Eigen/StdVector>
+// #include <Eigen/src/Core/util/Constants.h>
 
 #include <cstddef>
 #include <set>
@@ -104,11 +104,11 @@ namespace pinocchio
     ///  \brief The type of Tensor for Kinematics and Dynamics second order derivatives
     typedef Tensor<Scalar, 3, Options> Tensor3x;
 
-    // TODO Remove when API is stabilized
-    PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
-    PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
-    typedef ContactCholeskyDecompositionTpl<Scalar, Options> ContactCholeskyDecomposition;
-    PINOCCHIO_COMPILER_DIAGNOSTIC_POP
+    // // TODO Remove when API is stabilized
+    // PINOCCHIO_COMPILER_DIAGNOSTIC_PUSH
+    // PINOCCHIO_COMPILER_DIAGNOSTIC_IGNORED_DEPRECECATED_DECLARATIONS
+    // typedef ContactCholeskyDecompositionTpl<Scalar, Options> ContactCholeskyDecomposition;
+    // PINOCCHIO_COMPILER_DIAGNOSTIC_POP
 
     /// \brief Vector of pinocchio::JointData associated to the pinocchio::JointModel stored in
     /// model, encapsulated in JointDataAccessor.
@@ -543,7 +543,7 @@ namespace pinocchio
 #endif
 
     /// \brief Cholesky decomposition of the KKT contact matrix
-    ContactCholeskyDecomposition contact_chol;
+    // ContactCholeskyDecomposition contact_chol;
 
     /// \brief RHS vector when solving the contact dynamics KKT problem
     VectorXs primal_dual_contact_solution;

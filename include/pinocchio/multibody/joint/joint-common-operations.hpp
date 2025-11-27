@@ -10,7 +10,6 @@
 #include "pinocchio/math/fwd.hpp"
 
 #include <boost/type_traits.hpp>
-#include <boost/variant.hpp>
 
 namespace pinocchio
 {

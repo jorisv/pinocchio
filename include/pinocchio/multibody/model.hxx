@@ -7,8 +7,8 @@
 #define __pinocchio_multibody_model_hxx__
 
 #include "pinocchio/utils/string-generator.hpp"
-#include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
-#include "pinocchio/algorithm/model.hpp"
+// #include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
+// #include "pinocchio/algorithm/model.hpp"
 
 /// @cond DEV
 
@@ -158,12 +158,13 @@ namespace pinocchio
     supports[joint_id].push_back(joint_id);
 
     mimic_joint_supports.push_back(mimic_joint_supports[parent]);
-    if (auto jmodel_ = boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(&jmodel))
-    {
-      mimicking_joints.push_back(jmodel.id());
-      mimicked_joints.push_back(jmodel_->jmodel().id());
-      mimic_joint_supports[joint_id].push_back(joint_id);
-    }
+    // if (auto jmodel_ = boost::get<JointModelMimicTpl<Scalar, Options,
+    // JointCollectionTpl>>(&jmodel))
+    // {
+    //   mimicking_joints.push_back(jmodel.id());
+    //   mimicked_joints.push_back(jmodel_->jmodel().id());
+    //   mimic_joint_supports[joint_id].push_back(joint_id);
+    // }
     return joint_id;
   }
 

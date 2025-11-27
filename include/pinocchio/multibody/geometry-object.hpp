@@ -16,7 +16,7 @@
 /// fwd.hpp contains some define to change the boost::variant max size.
 /// If we don't include it before, default size is choosed that can
 /// make all the build fail.
-#include <boost/variant.hpp>
+// #include <boost/variant.hpp>
 
 namespace pinocchio
 {
@@ -70,7 +70,8 @@ namespace pinocchio
     double meshShininess{0.};
   };
 
-  typedef boost::variant<GeometryNoMaterial, GeometryPhongMaterial> GeometryMaterial;
+  typedef int GeometryMaterial;
+  // typedef boost::variant<GeometryNoMaterial, GeometryPhongMaterial> GeometryMaterial;
 
   struct GeometryObject; // fwd
 
@@ -159,7 +160,7 @@ namespace pinocchio
       const bool overrideMaterial = false,
       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0, 0, 0, 1),
       const std::string & meshTexturePath = "",
-      const GeometryMaterial & meshMaterial = GeometryNoMaterial())
+      const GeometryMaterial & meshMaterial = 0)
     : Base(name, parent_joint, parent_frame, placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)
@@ -198,7 +199,7 @@ namespace pinocchio
       const bool overrideMaterial = false,
       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0, 0, 0, 1),
       const std::string & meshTexturePath = "",
-      const GeometryMaterial & meshMaterial = GeometryNoMaterial())
+      const GeometryMaterial & meshMaterial = 0)
     : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)
@@ -239,7 +240,7 @@ namespace pinocchio
       const bool overrideMaterial = false,
       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0, 0, 0, 1),
       const std::string & meshTexturePath = "",
-      const GeometryMaterial & meshMaterial = GeometryNoMaterial())
+      const GeometryMaterial & meshMaterial = 0)
     : Base(name, parent_joint, parent_frame, placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)
@@ -280,7 +281,7 @@ namespace pinocchio
       const bool overrideMaterial = false,
       const Eigen::Vector4d & meshColor = Eigen::Vector4d(0, 0, 0, 1),
       const std::string & meshTexturePath = "",
-      const GeometryMaterial & meshMaterial = GeometryNoMaterial())
+      const GeometryMaterial & meshMaterial = 0)
     : Base(name, parent_joint, std::numeric_limits<FrameIndex>::max(), placement)
     , geometry(collision_geometry)
     , meshPath(meshPath)

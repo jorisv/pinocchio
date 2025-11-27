@@ -9,7 +9,7 @@
 #include "pinocchio/spatial/fwd.hpp"
 #include "pinocchio/multibody/model.hpp"
 #include "pinocchio/utils/string-generator.hpp"
-#include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
+// #include "pinocchio/multibody/liegroup/liegroup-algo.hpp"
 
 /// @cond DEV
 
@@ -166,8 +166,9 @@ namespace pinocchio
     typedef typename Model::JointIndex JointIndex;
 
     /* Create data structure associated to the joints */
-    for (JointIndex i = 0; i < (JointIndex)(model.njoints); ++i)
-      joints.push_back(CreateJointData<Scalar, Options, JointCollectionTpl>::run(model.joints[i]));
+    // for (JointIndex i = 0; i < (JointIndex)(model.njoints); ++i)
+    //   joints.push_back(CreateJointData<Scalar, Options,
+    //   JointCollectionTpl>::run(model.joints[i]));
 
     /* Init for CRBA */
     M.setZero();
@@ -254,12 +255,12 @@ namespace pinocchio
         parents_fromRow[(Index)idx_vExtended_j] = -1;
 
       JointIndex first_non_mimic_parent_id = parent;
-      while (first_non_mimic_parent_id > 0
-             && boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(
-               &model.joints[first_non_mimic_parent_id]))
-      {
-        first_non_mimic_parent_id = model.parents[first_non_mimic_parent_id];
-      }
+      // while (first_non_mimic_parent_id > 0
+      //        && boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(
+      //          &model.joints[first_non_mimic_parent_id]))
+      // {
+      //   first_non_mimic_parent_id = model.parents[first_non_mimic_parent_id];
+      // }
 
       if (first_non_mimic_parent_id > 0)
         non_mimic_parents_fromRow[(Index)idx_vExtended_j] =
@@ -269,12 +270,12 @@ namespace pinocchio
         non_mimic_parents_fromRow[(Index)idx_vExtended_j] = -1;
 
       JointIndex first_mimic_parent_id = parent;
-      while (first_mimic_parent_id > 0
-             && !boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(
-               &model.joints[first_mimic_parent_id]))
-      {
-        first_mimic_parent_id = model.parents[first_mimic_parent_id];
-      }
+      // while (first_mimic_parent_id > 0
+      //        && !boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(
+      //          &model.joints[first_mimic_parent_id]))
+      // {
+      //   first_mimic_parent_id = model.parents[first_mimic_parent_id];
+      // }
 
       if (first_mimic_parent_id > 0)
         mimic_parents_fromRow[(Index)idx_vExtended_j] =

@@ -132,15 +132,16 @@ namespace pinocchio
       {
         CHECK_DATA(
           jparent.idx_vExtended() + jparent.nvExtended() - 1 == data.parents_fromRow[(size_t)row]);
-        if (boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(&jparent))
-        {
-          CHECK_DATA(data.parents_fromRow[(size_t)row] == data.mimic_parents_fromRow[(size_t)row]);
-        }
-        else
-        {
-          CHECK_DATA(
-            data.parents_fromRow[(size_t)row] == data.non_mimic_parents_fromRow[(size_t)row]);
-        }
+        // if (boost::get<JointModelMimicTpl<Scalar, Options, JointCollectionTpl>>(&jparent))
+        // {
+        //   CHECK_DATA(data.parents_fromRow[(size_t)row] ==
+        //   data.mimic_parents_fromRow[(size_t)row]);
+        // }
+        // else
+        // {
+        //   CHECK_DATA(
+        //     data.parents_fromRow[(size_t)row] == data.non_mimic_parents_fromRow[(size_t)row]);
+        // }
       }
     }
 
