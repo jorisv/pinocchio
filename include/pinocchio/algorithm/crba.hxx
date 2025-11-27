@@ -5,7 +5,7 @@
 #ifndef __pinocchio_crba_hxx__
 #define __pinocchio_crba_hxx__
 
-#include "pinocchio/multibody/visitor.hpp"
+#include "pinocchio/multibody/visitor2.hpp"
 #include "pinocchio/spatial/act-on-set.hpp"
 #include "pinocchio/algorithm/kinematics.hpp"
 #include "pinocchio/algorithm/check.hpp"
@@ -23,13 +23,9 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConfigVectorType>
     struct CrbaWorldConventionForwardStep
-    : public fusion::JointUnaryVisitorBase<
-        CrbaWorldConventionForwardStep<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, const ConfigVectorType &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -60,13 +56,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct CrbaWorldConventionBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        CrbaWorldConventionBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(const JointModelBase<JointModel> & jmodel, const Model & model, Data & data)
@@ -104,13 +96,9 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConfigVectorType>
     struct CrbaLocalConventionForwardStep
-    : public fusion::JointUnaryVisitorBase<
-        CrbaLocalConventionForwardStep<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, const ConfigVectorType &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -132,13 +120,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct CrbaLocalConventionBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        CrbaLocalConventionBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -210,14 +194,21 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)(model.njoints); ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
       }
 
       typedef CrbaLocalConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       // Add the armature contribution
@@ -247,14 +238,18 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)(model.njoints); ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
       }
 
       typedef CrbaWorldConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(model.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) { Pass2::algo(cmodel_v, model, data); }, model.joints[i]);
       }
 
       // Add the armature contribution

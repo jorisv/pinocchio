@@ -6,7 +6,7 @@
 #define __pinocchio_algorithm_aba_hxx__
 
 #include "pinocchio/spatial/act-on-set.hpp"
-#include "pinocchio/multibody/visitor.hpp"
+#include "pinocchio/multibody/visitor2.hpp"
 #include "pinocchio/algorithm/check.hpp"
 
 /// @cond DEV
@@ -83,19 +83,9 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType>
     struct AbaWorldConventionForwardStep1
-    : public fusion::JointUnaryVisitorBase<AbaWorldConventionForwardStep1<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::
-        vector<const Model &, Data &, const ConfigVectorType &, const TangentVectorType &>
-          ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -140,13 +130,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct AbaWorldConventionBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        AbaWorldConventionBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -194,13 +180,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct AbaWorldConventionForwardStep2
-    : public fusion::JointUnaryVisitorBase<
-        AbaWorldConventionForwardStep2<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -266,21 +248,33 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
       }
 
       typedef AbaWorldConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       typedef AbaWorldConventionForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
@@ -330,22 +324,34 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
         data.of[i] -= data.oMi[i].act(fext[i]);
       }
 
       typedef AbaWorldConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       typedef AbaWorldConventionForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       return data.ddq;
@@ -358,19 +364,9 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType>
     struct AbaLocalConventionForwardStep1
-    : public fusion::JointUnaryVisitorBase<AbaLocalConventionForwardStep1<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::
-        vector<const Model &, Data &, const ConfigVectorType &, const TangentVectorType &>
-          ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -403,13 +399,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct AbaLocalConventionBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        AbaLocalConventionBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -443,13 +435,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct AbaLocalConventionForwardStep2
-    : public fusion::JointUnaryVisitorBase<
-        AbaLocalConventionForwardStep2<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -513,21 +501,33 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
       }
 
       typedef AbaLocalConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       typedef AbaLocalConventionForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
@@ -578,22 +578,34 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
         data.f[i] -= fext[i];
       }
 
       typedef AbaLocalConventionBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       typedef AbaLocalConventionForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
@@ -611,13 +623,9 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConfigVectorType>
     struct ComputeMinverseForwardStep1
-    : public fusion::JointUnaryVisitorBase<
-        ComputeMinverseForwardStep1<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, const ConfigVectorType &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -653,13 +661,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct ComputeMinverseBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        ComputeMinverseBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -729,13 +733,9 @@ namespace pinocchio
     {
       template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
       struct ComputeMinverseBackwardStep
-      : public fusion::JointUnaryVisitorBase<
-          ComputeMinverseBackwardStep<Scalar, Options, JointCollectionTpl>>
       {
         typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
         typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-        typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
         template<typename JointModel>
         static void algo(
@@ -787,13 +787,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct ComputeMinverseForwardStep2
-    : public fusion::JointUnaryVisitorBase<
-        ComputeMinverseForwardStep2<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -853,21 +849,32 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
       }
 
       data.Fcrb[0].setZero();
       typedef ComputeMinverseBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       typedef ComputeMinverseForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       return data.Minv;
@@ -889,13 +896,21 @@ namespace pinocchio
     typedef impl::optimized::ComputeMinverseBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
     for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
     {
-      Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+      boost::variant2::visit(
+        [&](const auto & cmodel_v) {
+          Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+        },
+        model.joints[i]);
     }
 
     typedef impl::ComputeMinverseForwardStep2<Scalar, Options, JointCollectionTpl> Pass3;
     for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
     {
-      Pass3::run(model.joints[i], data.joints[i], typename Pass3::ArgsType(model, data));
+      boost::variant2::visit(
+        [&](const auto & cmodel_v) {
+          Pass3::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+        },
+        model.joints[i]);
     }
 
     return data.Minv;

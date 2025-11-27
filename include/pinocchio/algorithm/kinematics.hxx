@@ -5,8 +5,9 @@
 #ifndef __pinocchio_kinematics_hxx__
 #define __pinocchio_kinematics_hxx__
 
+#include "pinocchio/macros.hpp"
 #include "model.hpp"
-#include "pinocchio/multibody/visitor.hpp"
+#include "pinocchio/multibody/visitor2.hpp"
 #include "pinocchio/algorithm/check.hpp"
 
 namespace pinocchio
@@ -40,13 +41,9 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConfigVectorType>
     struct ForwardKinematicZeroStep
-    : fusion::JointUnaryVisitorBase<
-        ForwardKinematicZeroStep<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, const ConfigVectorType &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -91,8 +88,11 @@ namespace pinocchio
       typedef ForwardKinematicZeroStep<Scalar, Options, JointCollectionTpl, ConfigVectorType> Algo;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Algo::run(
-          model.joints[i], data.joints[i], typename Algo::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Algo::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
       }
     }
 
@@ -103,19 +103,9 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType>
     struct ForwardKinematicFirstStep
-    : fusion::JointUnaryVisitorBase<ForwardKinematicFirstStep<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::
-        vector<const Model &, Data &, const ConfigVectorType &, const TangentVectorType &>
-          ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -172,9 +162,13 @@ namespace pinocchio
         Algo;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Algo::run(
-          model.joints[i], data.joints[i],
-          typename Algo::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Algo::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
       }
     }
 
@@ -186,24 +180,9 @@ namespace pinocchio
       typename TangentVectorType1,
       typename TangentVectorType2>
     struct ForwardKinematicSecondStep
-    : fusion::JointUnaryVisitorBase<ForwardKinematicSecondStep<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType1,
-        TangentVectorType2>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<
-        const Model &,
-        Data &,
-        const ConfigVectorType &,
-        const TangentVectorType1 &,
-        const TangentVectorType2 &>
-        ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -255,7 +234,8 @@ namespace pinocchio
     {
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         q.size(), model.nq, "The configuration vector is not equal to model.nq.");
-      PINOCCHIO_CHECK_ARGUMENT_SIZE(v.size(), model.nv, "The velocity vector is not of right size");
+      PINOCCHIO_CHECK_ARGUMENT_SIZE(
+        v.size(), model.nv, "The velocity vector is not of right size ");
       PINOCCHIO_CHECK_ARGUMENT_SIZE(
         a.size(), model.nv, "The acceleration vector is not of right size");
       assert(model.check(data) && "data is not consistent with model.");
@@ -271,9 +251,13 @@ namespace pinocchio
         Algo;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Algo::run(
-          model.joints[i], data.joints[i],
-          typename Algo::ArgsType(model, data, q.derived(), v.derived(), a.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Algo::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived(), a.derived());
+          },
+          model.joints[i]);
       }
     }
   } // namespace impl

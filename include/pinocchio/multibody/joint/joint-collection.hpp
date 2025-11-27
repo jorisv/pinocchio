@@ -8,7 +8,7 @@
 #include "pinocchio/multibody/joint/fwd.hpp"
 #include "pinocchio/multibody/joint/joints.hpp"
 
-#include <boost/variant.hpp>
+#include <boost/variant2.hpp>
 
 namespace pinocchio
 {
@@ -73,7 +73,7 @@ namespace pinocchio
     // Joint Universal
     typedef JointModelUniversalTpl<Scalar, Options> JointModelUniversal;
 
-    typedef boost::variant<
+    typedef boost::variant2::variant<
       //    JointModelVoid,
       JointModelRX,
       JointModelRY,
@@ -150,7 +150,7 @@ namespace pinocchio
     // Joint Universal
     typedef JointDataUniversalTpl<Scalar, Options> JointDataUniversal;
 
-    typedef boost::variant<
+    typedef boost::variant2::variant<
       //    JointDataVoid
       JointDataRX,
       JointDataRY,

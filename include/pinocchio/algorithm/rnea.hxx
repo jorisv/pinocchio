@@ -7,7 +7,7 @@
 
 /// @cond DEV
 
-#include "pinocchio/multibody/visitor.hpp"
+#include "pinocchio/multibody/visitor2.hpp"
 #include "pinocchio/algorithm/check.hpp"
 
 namespace pinocchio
@@ -22,24 +22,9 @@ namespace pinocchio
       typename TangentVectorType1,
       typename TangentVectorType2>
     struct RneaForwardStep
-    : public fusion::JointUnaryVisitorBase<RneaForwardStep<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType1,
-        TangentVectorType2>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<
-        const Model &,
-        Data &,
-        const ConfigVectorType &,
-        const TangentVectorType1 &,
-        const TangentVectorType2 &>
-        ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -81,12 +66,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct RneaBackwardStep
-    : public fusion::JointUnaryVisitorBase<RneaBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -141,17 +123,25 @@ namespace pinocchio
         Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType1,
         TangentVectorType2>
         Pass1;
-      typename Pass1::ArgsType arg1(model, data, q.derived(), v.derived(), a.derived());
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(model.joints[i], data.joints[i], arg1);
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived(), a.derived());
+          },
+          model.joints[i]);
       }
 
       typedef RneaBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
-      typename Pass2::ArgsType arg2(model, data);
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], arg2);
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       // Add rotorinertia contribution
@@ -199,16 +189,24 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived(), a.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived(), a.derived());
+          },
+          model.joints[i]);
         data.f[i] -= fext[i];
       }
 
       typedef RneaBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)model.njoints - 1; i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       // Add armature contribution
@@ -225,15 +223,9 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType>
     struct NLEForwardStep
-    : public fusion::JointUnaryVisitorBase<
-        NLEForwardStep<Scalar, Options, JointCollectionTpl, ConfigVectorType, TangentVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::
-        vector<const Model &, Data &, const ConfigVectorType &, const TangentVectorType &>
-          ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -266,12 +258,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct NLEBackwardStep
-    : public fusion::JointUnaryVisitorBase<NLEBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -324,15 +313,23 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
       }
 
       typedef NLEBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data);
+          },
+          model.joints[i]);
       }
 
       return data.nle;
@@ -344,13 +341,9 @@ namespace pinocchio
       template<typename, int> class JointCollectionTpl,
       typename ConfigVectorType>
     struct ComputeGeneralizedGravityForwardStep
-    : public fusion::JointUnaryVisitorBase<
-        ComputeGeneralizedGravityForwardStep<Scalar, Options, JointCollectionTpl, ConfigVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, const ConfigVectorType &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -376,13 +369,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct ComputeGeneralizedGravityBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        ComputeGeneralizedGravityBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &, typename Data::VectorXs &> ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -431,15 +420,22 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
       }
 
       data.g.setZero();
       typedef ComputeGeneralizedGravityBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data, data.g));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, data.g);
+          },
+          model.joints[i]);
       }
 
       return data.g;
@@ -473,8 +469,11 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i], typename Pass1::ArgsType(model, data, q.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived());
+          },
+          model.joints[i]);
         data.f[i] -= fext[i];
       }
       // Set to zero, because it's not an assignation, that is done in the algorithm but a sum to
@@ -483,8 +482,11 @@ namespace pinocchio
       typedef ComputeGeneralizedGravityBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(
-          model.joints[i], data.joints[i], typename Pass2::ArgsType(model, data, data.tau));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass2::algo(cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, data.tau);
+          },
+          model.joints[i]);
       }
 
       return data.tau;
@@ -497,19 +499,9 @@ namespace pinocchio
       typename ConfigVectorType,
       typename TangentVectorType>
     struct CoriolisMatrixForwardStep
-    : public fusion::JointUnaryVisitorBase<CoriolisMatrixForwardStep<
-        Scalar,
-        Options,
-        JointCollectionTpl,
-        ConfigVectorType,
-        TangentVectorType>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::
-        vector<const Model &, Data &, const ConfigVectorType &, const TangentVectorType &>
-          ArgsType;
 
       template<typename JointModel>
       static void algo(
@@ -573,13 +565,9 @@ namespace pinocchio
 
     template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
     struct CoriolisMatrixBackwardStep
-    : public fusion::JointUnaryVisitorBase<
-        CoriolisMatrixBackwardStep<Scalar, Options, JointCollectionTpl>>
     {
       typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
       typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-      typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
       template<typename JointModel>
       static void algo(const JointModelBase<JointModel> & jmodel, const Model & model, Data & data)
@@ -653,15 +641,20 @@ namespace pinocchio
         Pass1;
       for (JointIndex i = 1; i < (JointIndex)model.njoints; ++i)
       {
-        Pass1::run(
-          model.joints[i], data.joints[i],
-          typename Pass1::ArgsType(model, data, q.derived(), v.derived()));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) {
+            Pass1::algo(
+              cmodel_v, getJointData(cmodel_v, data.joints[i]), model, data, q.derived(),
+              v.derived());
+          },
+          model.joints[i]);
       }
 
       typedef CoriolisMatrixBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
       for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
       {
-        Pass2::run(model.joints[i], typename Pass2::ArgsType(model, data));
+        boost::variant2::visit(
+          [&](const auto & cmodel_v) { Pass2::algo(cmodel_v, model, data); }, model.joints[i]);
       }
 
       return data.C;
@@ -669,13 +662,9 @@ namespace pinocchio
   } // namespace impl
   template<typename Scalar, int Options, template<typename, int> class JointCollectionTpl>
   struct GetCoriolisMatrixBackwardStep
-  : public fusion::JointUnaryVisitorBase<
-      GetCoriolisMatrixBackwardStep<Scalar, Options, JointCollectionTpl>>
   {
     typedef ModelTpl<Scalar, Options, JointCollectionTpl> Model;
     typedef DataTpl<Scalar, Options, JointCollectionTpl> Data;
-
-    typedef boost::fusion::vector<const Model &, Data &> ArgsType;
 
     template<typename JointModel>
     static void algo(const JointModelBase<JointModel> & jmodel, const Model & model, Data & data)
@@ -750,7 +739,8 @@ namespace pinocchio
     typedef GetCoriolisMatrixBackwardStep<Scalar, Options, JointCollectionTpl> Pass2;
     for (JointIndex i = (JointIndex)(model.njoints - 1); i > 0; --i)
     {
-      Pass2::run(model.joints[i], typename Pass2::ArgsType(model, data));
+      boost::variant2::visit(
+        [&](const auto & cmodel_v) { Pass2::algo(cmodel_v, model, data); }, model.joints[i]);
     }
 
     return data.C;
