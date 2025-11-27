@@ -262,19 +262,19 @@ endif()
 
 # Define the visualizers target
 set(VISUALIZERS_LIB_NAME "${PROJECT_NAME}_visualizers")
-pinocchio_target(
-  ${VISUALIZERS_LIB_NAME}
-  SCALAR default
-  SOURCES ${${PROJECT_NAME}_VISUALIZERS_SOURCES} ${${PROJECT_NAME}_VISUALIZERS_PUBLIC_HEADERS})
-pinocchio_config(visualizers ${VISUALIZERS_LIB_NAME})
-target_link_libraries(${VISUALIZERS_LIB_NAME} PUBLIC ${PROJECT_NAME}_default)
-if(BUILD_WITH_HPP_FCL_SUPPORT)
-  target_compile_definitions(
-    ${VISUALIZERS_LIB_NAME}
-    PUBLIC PINOCCHIO_WITH_HPP_FCL
-    PRIVATE COAL_DISABLE_HPP_FCL_WARNINGS)
-  target_link_libraries(${VISUALIZERS_LIB_NAME} PUBLIC hpp-fcl::hpp-fcl)
-endif()
+# pinocchio_target(
+#   ${VISUALIZERS_LIB_NAME}
+#   SCALAR default
+#   SOURCES ${${PROJECT_NAME}_VISUALIZERS_SOURCES} ${${PROJECT_NAME}_VISUALIZERS_PUBLIC_HEADERS})
+# pinocchio_config(visualizers ${VISUALIZERS_LIB_NAME})
+# target_link_libraries(${VISUALIZERS_LIB_NAME} PUBLIC ${PROJECT_NAME}_default)
+# if(BUILD_WITH_HPP_FCL_SUPPORT)
+#   target_compile_definitions(
+#     ${VISUALIZERS_LIB_NAME}
+#     PUBLIC PINOCCHIO_WITH_HPP_FCL
+#     PRIVATE COAL_DISABLE_HPP_FCL_WARNINGS)
+#   target_link_libraries(${VISUALIZERS_LIB_NAME} PUBLIC hpp-fcl::hpp-fcl)
+# endif()
 
 # Define the parsers target.
 #

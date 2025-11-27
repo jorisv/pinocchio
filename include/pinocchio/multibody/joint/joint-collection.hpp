@@ -9,7 +9,6 @@
 #include "pinocchio/multibody/joint/joints.hpp"
 
 #include <boost/variant.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
 
 namespace pinocchio
 {
@@ -63,14 +62,6 @@ namespace pinocchio
     // Joint Planar
     typedef JointModelPlanarTpl<Scalar, Options> JointModelPlanar;
 
-    // Joint Composite
-    typedef JointModelCompositeTpl<Scalar, Options, ::pinocchio::JointCollectionDefaultTpl>
-      JointModelComposite;
-
-    // Joint Mimic
-    typedef JointModelMimicTpl<Scalar, Options, ::pinocchio::JointCollectionDefaultTpl>
-      JointModelMimic;
-
     // Joint Helical
     typedef JointModelHelicalTpl<Scalar, Options, 0> JointModelHx;
     typedef JointModelHelicalTpl<Scalar, Options, 1> JointModelHy;
@@ -105,9 +96,7 @@ namespace pinocchio
       JointModelHy,
       JointModelHz,
       JointModelHelicalUnaligned,
-      JointModelUniversal,
-      boost::recursive_wrapper<JointModelComposite>,
-      boost::recursive_wrapper<JointModelMimic>>
+      JointModelUniversal>
       JointModelVariant;
 
     // Joint Revolute
@@ -150,14 +139,6 @@ namespace pinocchio
     // Joint Planar
     typedef JointDataPlanarTpl<Scalar, Options> JointDataPlanar;
 
-    // Joint Composite
-    typedef JointDataCompositeTpl<Scalar, Options, ::pinocchio::JointCollectionDefaultTpl>
-      JointDataComposite;
-
-    // Joint Mimic
-    typedef JointDataMimicTpl<Scalar, Options, ::pinocchio::JointCollectionDefaultTpl>
-      JointDataMimic;
-
     // Joint Helical
     typedef JointDataHelicalTpl<Scalar, Options, 0> JointDataHx;
     typedef JointDataHelicalTpl<Scalar, Options, 1> JointDataHy;
@@ -192,9 +173,7 @@ namespace pinocchio
       JointDataHy,
       JointDataHz,
       JointDataHelicalUnaligned,
-      JointDataUniversal,
-      boost::recursive_wrapper<JointDataComposite>,
-      boost::recursive_wrapper<JointDataMimic>>
+      JointDataUniversal>
       JointDataVariant;
   };
 
