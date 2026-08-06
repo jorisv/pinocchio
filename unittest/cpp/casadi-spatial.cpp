@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_motion)
 BOOST_AUTO_TEST_CASE(test_quaternion)
 {
   typedef pinocchio::SE3Tpl<casadi::SX> SE3AD;
-  typedef pinocchio::SE3 SE3;
+  typedef pinocchio::SE3Tpl<double> SE3;
 
   SE3AD ad_M;
   SE3AD::Matrix3 & ad_rot = ad_M.rotation();
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_log3_firstorder_derivatives)
   typedef double Scalar;
   typedef casadi::SX ADScalar;
 
-  typedef pinocchio::SE3 SE3;
+  typedef pinocchio::SE3Tpl<Scalar> SE3;
   typedef SE3::Vector3 Vector3;
   typedef SE3::Matrix3 Matrix3;
 

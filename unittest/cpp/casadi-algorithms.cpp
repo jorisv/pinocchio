@@ -123,15 +123,15 @@ BOOST_AUTO_TEST_CASE(test_jacobian)
   std::cout << "J_local_res:" << J_local_res << std::endl;
 
   std::vector<double> v_local_vec(static_cast<std::vector<double>>(v_local_res[0]));
-  BOOST_CHECK(
-    (jacobian_local * v).isApprox(Eigen::Map<pinocchio::Motion::Vector6>(v_local_vec.data())));
+  BOOST_CHECK((jacobian_local * v)
+                .isApprox(Eigen::Map<pinocchio::MotionTpl<double>::Vector6>(v_local_vec.data())));
 
   casadi::DMVector v_world_res = eval_velocity_world(casadi::DMVector{q_vec, v_vec});
   casadi::DMVector J_world_res = eval_jacobian_world(casadi::DMVector{q_vec, v_vec});
 
   std::vector<double> v_world_vec(static_cast<std::vector<double>>(v_world_res[0]));
-  BOOST_CHECK(
-    (jacobian_world * v).isApprox(Eigen::Map<pinocchio::Motion::Vector6>(v_world_vec.data())));
+  BOOST_CHECK((jacobian_world * v)
+                .isApprox(Eigen::Map<pinocchio::MotionTpl<double>::Vector6>(v_world_vec.data())));
 
   Data::Matrix6x J_local_mat(6, model.nv), J_world_mat(6, model.nv);
 
@@ -499,8 +499,9 @@ BOOST_AUTO_TEST_CASE(test_interp)
 
   Model model2;
   typedef pinocchio::SE3Tpl<double> SE3;
-  size_t baseId = model2.addJoint(0, pinocchio::JointModelSpherical(), SE3::Identity(), "base");
-  model2.addJoint(baseId, pinocchio::JointModelRX(), SE3::Random(), "pole");
+  size_t baseId =
+    model2.addJoint(0, pinocchio::JointModelSphericalTpl<double>(), SE3::Identity(), "base");
+  model2.addJoint(baseId, pinocchio::JointModelRevoluteTpl<double, 0, 0>(), SE3::Random(), "pole");
   model2.lowerPositionLimit.tail<1>().fill(-4.);
   model2.upperPositionLimit.tail<1>().fill(4.);
 
@@ -519,8 +520,9 @@ BOOST_AUTO_TEST_CASE(test_kinetic_energy)
 
   Model model;
   // pinocchio::buildModels::humanoidRandom(model, true);
-  model.addJoint(0, pinocchio::JointModelSpherical(), pinocchio::SE3::Identity(), "base");
-  model.appendBodyToJoint(1, pinocchio::Inertia::Identity());
+  model.addJoint(
+    0, pinocchio::JointModelSphericalTpl<double>(), pinocchio::SE3Tpl<double>::Identity(), "base");
+  model.appendBodyToJoint(1, pinocchio::InertiaTpl<double>::Identity());
   std::cout << model;
   model.lowerPositionLimit.head<3>().fill(-1.);
   model.upperPositionLimit.head<3>().fill(1.);

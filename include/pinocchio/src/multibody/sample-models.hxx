@@ -105,6 +105,8 @@ namespace pinocchio
       {
         typedef typename JointModel::ConfigVector_t CV;
         typedef typename JointModel::TangentVector_t TV;
+        typedef typename ModelTpl<Scalar, Options, JointCollectionTpl>::SE3 SE3;
+        typedef typename ModelTpl<Scalar, Options, JointCollectionTpl>::Inertia Inertia;
 
         CV qmin = CV::Constant(joint.nq(), -3.14), qmax = CV::Constant(joint.nq(), 3.14);
         TV vmax = TV::Constant(joint.nv(), 10), taumax = TV::Constant(joint.nv(), 10);

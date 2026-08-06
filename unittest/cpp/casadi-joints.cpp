@@ -531,8 +531,8 @@ struct TestADOnJoints
 
 BOOST_AUTO_TEST_CASE(test_all_joints)
 {
-  typedef pinocchio::JointCollectionDefault::JointModelVariant JointModelVariant;
+  typedef pinocchio::JointCollectionDefaultTpl<double>::JointModelVariant JointModelVariant;
   boost::mpl::for_each<JointModelVariant::types>(TestADOnJoints());
 
-  TestADOnJoints()(pinocchio::JointModel());
+  TestADOnJoints()(pinocchio::JointModelTpl<double>());
 }

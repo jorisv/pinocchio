@@ -273,7 +273,7 @@ if(BUILD_WITH_CASADI_SUPPORT)
         )
         target_link_libraries(
             pinocchio-test-cpp-${name}
-            PRIVATE pinocchio_casadi_headers
+            PRIVATE pinocchio_casadi
         )
     endmacro()
 
