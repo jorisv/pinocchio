@@ -1360,4 +1360,32 @@ BOOST_AUTO_TEST_CASE(test_add_frame_with_zero_inertia_preserves_the_parent_inert
   }
 }
 
+BOOST_AUTO_TEST_CASE(append_model_name_and_gravity)
+{
+  // Test that appendModel copies name and gravity from modelA (Issue #2973)
+  Model modelA;
+  modelA.name = "modelA";
+  modelA.addJoint(
+    0, JointModelRevoluteUnaligned(Eigen::Vector3d(0, 1, 0)), SE3::Identity(), "jointA");
+  modelA.appendBodyToJoint(1, Inertia::FromSphere(1.0, 0.1), SE3::Identity());
+  Eigen::Vector3d custom_gravity(0.0, -9.81, 0.0);
+  modelA.gravity = Motion(custom_gravity, Eigen::Vector3d::Zero());
+
+  Model modelB;
+  modelB.name = "modelB";
+
+  Model modelC;
+  modelC.name = "modelC";
+  modelC.gravity = Motion(Eigen::Vector3d(0, 0, -9.81), Eigen::Vector3d::Zero());
+
+  Model combined = appendModel(modelA, modelB, 0, SE3::Identity());
+
+  BOOST_CHECK_EQUAL(combined.name, modelA.name);
+  BOOST_CHECK(combined.gravity == modelA.gravity);
+
+  appendModel(modelA, modelB, 0, SE3::Identity(), modelC);
+  BOOST_CHECK_EQUAL(modelC.name, modelA.name);
+  BOOST_CHECK(modelC.gravity == modelA.gravity);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

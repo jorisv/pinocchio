@@ -356,6 +356,9 @@ namespace pinocchio
 
     geomModel.geometryObjects.reserve(geomModelA.ngeoms + geomModelB.ngeoms);
 
+    model.name = modelA.name;
+    model.gravity = modelA.gravity;
+
     details::appendUniverseToModel(modelA, geomModelA, 0, id, model, geomModel);
     // Compute joints of A that should be added before and after joints of B
     std::vector<JointIndex> AJointsBeforeB;
